@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Barakah Bites</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="images/img1.jpeg" alt="Barakah Bites Logo">
+                <h1>Barakah Bites La</h1>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="menu.html">Menu</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="#" id="cartLink">Cart <span class="cart-count">0</span></a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Hungry? We Deliver Fast 🍔</h1>
+        <p>Fresh, hot and delicious food from Barakah Bites La straight to your door</p>
+        <a href="menu.html" class="btn-primary">Order Now</a>
+    </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="categories">
+    <div class="container">
+        <h2>Browse Categories</h2>
+        <div class="category-grid">
+            <div class="category-card">
+                <img src="images/pizza.jpg" alt="">
+                <h3>Pizza</h3>
+            </div>
+
+            <div class="category-card">
+                <img src="images/burger.jpg" alt="">
+                <h3>Burgers</h3>
+            </div>
+
+            <div class="category-card">
+                <img src="images/sandwich.jpg" alt="">
+                <h3>Sandwiches</h3>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURED -->
+<section class="featured">
+    <div class="container">
+        <h2>Popular Right Now 🔥</h2>
+        <div id="featuredFoods" class="food-grid"></div>
+    </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+    <div class="container">
+        <h2>How It Works</h2>
+        <div class="category-grid">
+            <div class="category-card">
+                <h3>1. Choose Food</h3>
+                <p>Browse your favorite meals</p>
+            </div>
+            <div class="category-card">
+                <h3>2. Add to Cart</h3>
+                <p>Build your order easily</p>
+            </div>
+            <div class="category-card">
+                <h3>3. Enjoy</h3>
+                <p>We deliver it hot & fresh</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Cart Modal -->
+    <div class="cart-modal" id="cartModal">
+        <div class="cart-content">
+            <div class="cart-header">
+                <h2>Your Cart</h2>
+                <span class="close-btn" id="closeCart">&times;</span>
+            </div>
+            <div class="cart-body">
+                <div id="cartItems">
+                    <!-- Cart items will be loaded here -->
+                    <p class="empty-cart-message">Your cart is empty</p>
+                </div>
+                <div class="cart-footer">
+                    <div class="cart-total">
+                        <h3>Total: $<span id="cartTotal">0.00</span></h3>
+                    </div>
+                    <button class="btn-primary checkout-btn" id="checkoutBtn">Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cart-modal" id="orderFormModal">
+    <div class="cart-content">
+        <div class="cart-header">
+            <h2>Delivery Details</h2>
+            <span class="close-btn" id="closeForm">&times;</span>
+        </div>
+
+        <div class="cart-body">
+            <input type="text" id="custName" placeholder="Full Name" />
+            <input type="text" id="custPhone" placeholder="Phone Number" />
+            <textarea id="custAddress" placeholder="Delivery Address"></textarea>
+
+            <button class="btn-primary" id="sendWhatsApp">Send Order</button>
+        </div>
+    </div>
+</div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Barakah Bites La</h3>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="menu.html">Menu</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Us</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> 3755 S Vermont Ave,LA,CA 90007 US</p>
+                    <p><i class="fas fa-phone"></i> +1 (949) 426-8220</p>
+                    <p><i class="fas fa-envelope"></i> bbla@barakahbitesla.com</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Barakah bites La. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
