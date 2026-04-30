@@ -58,40 +58,61 @@ const foodData = [
 let cart = [];
 
 // ==========================
-// DOM ELEMENTS (SAFE)
+// DOM ELEMENTS
 // ==========================
-const cartLink = document.getElementById('cartLink');
-const cartModal = document.getElementById('cartModal');
-const closeCart = document.getElementById('closeCart');
-const cartItems = document.getElementById('cartItems');
-const cartTotal = document.getElementById('cartTotal');
-const cartCount = document.querySelector('.cart-count');
-const featuredFoods = document.getElementById('featuredFoods');
-const checkoutBtn = document.getElementById('checkoutBtn');
+let floatingCart;
+let floatingCartCount;
+let cartLink;
+let cartModal;
+let closeCart;
+let cartItems;
+let cartTotal;
+let cartCount;
+let featuredFoods;
+let checkoutBtn;
 
 // ==========================
 // INIT
 // ==========================
 document.addEventListener('DOMContentLoaded', function () {
 
+    // Assign DOM elements
+    floatingCart    = document.getElementById("floatingCart");
+    floatingCartCount = document.getElementById("floatingCartCount");
+    cartLink        = document.getElementById('cartLink');
+    cartModal       = document.getElementById('cartModal');
+    closeCart       = document.getElementById('closeCart');
+    cartItems       = document.getElementById('cartItems');
+    cartTotal       = document.getElementById('cartTotal');
+    cartCount       = document.querySelector('.cart-count');
+    featuredFoods   = document.getElementById('featuredFoods');
+    checkoutBtn     = document.getElementById('checkoutBtn');
+
     loadCartFromLocalStorage();
     updateCartUI();
-    const params = new URLSearchParams(window.location.search);
-const category = params.get("category");
 
-if (category && document.getElementById("menuFoods")) {
-    displayMenuFoods(category);
-}
+    // -- Menu page: handle ?category= URL param --
+    const params   = new URLSearchParams(window.location.search);
+    const category = params.get("category");
 
+    if (document.getElementById("menuFoods")) {
+        displayMenuFoods(category || 'all');
+        setupFilterButtons();
+
+        // Highlight the matching filter button when arriving via category link
+        if (category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === category);
+            });
+        }
+    }
+
+    // -- Home page: featured foods --
     if (featuredFoods) {
         displayFeaturedFoods();
     }
 
-    if (document.getElementById('menuFoods')) {
-        displayMenuFoods();
-        setupFilterButtons();
-    }
-
+    // -- Cart link in nav --
     if (cartLink) {
         cartLink.addEventListener('click', function (e) {
             e.preventDefault();
@@ -99,30 +120,124 @@ if (category && document.getElementById("menuFoods")) {
         });
     }
 
+    // -- Floating cart --
+    if (floatingCart) {
+        floatingCart.addEventListener('click', function () {
+            openCart();
+        });
+    }
+
+    // -- Close cart modal --
     if (closeCart) {
         closeCart.addEventListener('click', closeCartModal);
     }
 
+    // -- Checkout button → open order form --
     if (checkoutBtn) {
-        checkoutBtn.addEventListener('click', checkout);
+        checkoutBtn.addEventListener('click', function () {
+            if (cart.length === 0) {
+                alert("Your cart is empty!");
+                return;
+            }
+            // Close the cart modal first
+            closeCartModal();
+
+            const modal = document.getElementById("orderFormModal");
+            if (modal) {
+                modal.style.display = "flex";
+            } else {
+                // Should never happen now that every page has the modal,
+                // but guard just in case
+                alert("Order form not found. Please reload the page.");
+            }
+        });
     }
 
+    // -- BUG FIX: closeForm button was never wired up --
+    const closeFormBtn = document.getElementById("closeForm");
+    if (closeFormBtn) {
+        closeFormBtn.addEventListener('click', function () {
+            const modal = document.getElementById("orderFormModal");
+            if (modal) modal.style.display = "none";
+        });
+    }
+
+    // -- BUG FIX: sendWhatsApp had NO event listener at all --
+    const sendWhatsAppBtn = document.getElementById("sendWhatsApp");
+    if (sendWhatsAppBtn) {
+        sendWhatsAppBtn.addEventListener('click', function () {
+            const name    = document.getElementById("custName").value.trim();
+            const phone   = document.getElementById("custPhone").value.trim();
+            const address = document.getElementById("custAddress").value.trim();
+
+            if (!name || !phone || !address) {
+                alert("Please fill in all fields before sending.");
+                return;
+            }
+
+            // Build order summary
+            let orderText = `🍔 *New Order - Barakah Bites La*\n\n`;
+            orderText += `👤 *Name:* ${name}\n`;
+            orderText += `📞 *Phone:* ${phone}\n`;
+            orderText += `📍 *Address:* ${address}\n\n`;
+            orderText += `🛒 *Order Details:*\n`;
+
+            let total = 0;
+            cart.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                orderText += `  • ${item.name} x${item.quantity} = $${itemTotal.toFixed(2)}\n`;
+            });
+
+            orderText += `\n💰 *Total: $${total.toFixed(2)}*`;
+
+            // Replace with your actual WhatsApp number (digits only, with country code)
+            const whatsappNumber = "19494268220";
+            const encodedMessage = encodeURIComponent(orderText);
+            const whatsappURL    = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+            // Clear cart after sending
+            cart = [];
+            saveCartToLocalStorage();
+            updateCartUI();
+
+            // Close order form modal
+            const modal = document.getElementById("orderFormModal");
+            if (modal) modal.style.display = "none";
+
+            // Open WhatsApp
+            window.open(whatsappURL, "_blank");
+        });
+    }
+
+    // -- Close modals when clicking outside them --
     window.addEventListener('click', function (event) {
         if (event.target === cartModal) {
             closeCartModal();
         }
+        const orderModal = document.getElementById("orderFormModal");
+        if (event.target === orderModal) {
+            orderModal.style.display = "none";
+        }
     });
 
+    // -- Mobile hamburger menu --
+    const menuToggle = document.getElementById("menuToggle");
+    const navLinks   = document.getElementById("navLinks");
+    if (menuToggle && navLinks) {
+        menuToggle.addEventListener('click', function () {
+            navLinks.classList.toggle('active');
+        });
+    }
 });
 
 // ==========================
-// DISPLAY FEATURED FOODS
+// FEATURED FOODS
 // ==========================
 function displayFeaturedFoods() {
     if (!featuredFoods) return;
 
     featuredFoods.innerHTML = '';
-
     const featuredItems = foodData.slice(0, 3);
 
     featuredItems.forEach(food => {
@@ -146,7 +261,7 @@ function displayFeaturedFoods() {
 }
 
 // ==========================
-// DISPLAY MENU FOODS
+// MENU FOODS
 // ==========================
 function displayMenuFoods(category = 'all') {
     const menuFoods = document.getElementById('menuFoods');
@@ -179,7 +294,7 @@ function displayMenuFoods(category = 'all') {
 }
 
 // ==========================
-// ATTACH CART BUTTONS
+// CART BUTTONS
 // ==========================
 function attachCartButtons() {
     document.querySelectorAll('.add-to-cart').forEach(btn => {
@@ -203,38 +318,36 @@ function addToCart(foodId) {
         existing.quantity++;
     } else {
         cart.push({
-            id: food.id,
-            name: food.name,
-            price: food.price,
-            image: food.image,
+            id:       food.id,
+            name:     food.name,
+            price:    food.price,
+            image:    food.image,
             quantity: 1
         });
     }
 
     saveCartToLocalStorage();
     updateCartUI();
-
-    alert(`${food.name} added to cart!`);
 }
 
 // ==========================
 // UPDATE CART UI
 // ==========================
 function updateCartUI() {
-    if (cartCount) {
-        cartCount.textContent = cart.reduce((a, b) => a + b.quantity, 0);
-    }
+    const totalItems = cart.reduce((a, b) => a + b.quantity, 0);
+
+    if (cartCount)        cartCount.textContent        = totalItems;
+    if (floatingCartCount) floatingCartCount.textContent = totalItems;
 
     if (!cartItems || !cartTotal) return;
 
     if (cart.length === 0) {
-        cartItems.innerHTML = '<p class="empty-cart-message">Your cart is empty</p>';
-        cartTotal.textContent = '0.00';
+        cartItems.innerHTML    = '<p class="empty-cart-message">Your cart is empty</p>';
+        cartTotal.textContent  = '0.00';
         return;
     }
 
     cartItems.innerHTML = '';
-
     let total = 0;
 
     cart.forEach(item => {
@@ -247,18 +360,15 @@ function updateCartUI() {
         div.innerHTML = `
             <div class="item-info">
                 <h4>${item.name}</h4>
-                <p>$${item.price.toFixed(2)}</p>
+                <p class="item-price">$${item.price.toFixed(2)}</p>
             </div>
-
             <div class="item-quantity">
-                <button onclick="changeQty(${item.id}, -1)">-</button>
-                <span>${item.quantity}</span>
-                <button onclick="changeQty(${item.id}, 1)">+</button>
+                <button class="quantity-btn" onclick="changeQty(${item.id}, -1)">-</button>
+                <span class="quantity">${item.quantity}</span>
+                <button class="quantity-btn" onclick="changeQty(${item.id}, 1)">+</button>
             </div>
-
-            <p>$${itemTotal.toFixed(2)}</p>
-
-            <button onclick="removeItem(${item.id})">×</button>
+            <p class="item-price">$${itemTotal.toFixed(2)}</p>
+            <button class="remove-item" onclick="removeItem(${item.id})">×</button>
         `;
 
         cartItems.appendChild(div);
@@ -268,14 +378,13 @@ function updateCartUI() {
 }
 
 // ==========================
-// CHANGE QUANTITY
+// QUANTITY & REMOVE
 // ==========================
 window.changeQty = function (id, change) {
     const item = cart.find(i => i.id === id);
     if (!item) return;
 
     item.quantity += change;
-
     if (item.quantity <= 0) {
         cart = cart.filter(i => i.id !== id);
     }
@@ -284,9 +393,6 @@ window.changeQty = function (id, change) {
     updateCartUI();
 };
 
-// ==========================
-// REMOVE ITEM
-// ==========================
 window.removeItem = function (id) {
     cart = cart.filter(i => i.id !== id);
     saveCartToLocalStorage();
@@ -305,19 +411,6 @@ function closeCartModal() {
 }
 
 // ==========================
-// CHECKOUT
-// ==========================
-function checkout() {
-    if (cart.length === 0) {
-        alert("Cart is empty!");
-        return;
-    }
-
-    const form = document.getElementById("orderFormModal");
-    form.style.display = "flex";
-}
-
-// ==========================
 // LOCAL STORAGE
 // ==========================
 function saveCartToLocalStorage() {
@@ -330,72 +423,23 @@ function loadCartFromLocalStorage() {
 }
 
 // ==========================
-// FILTER MENU
+// FILTER BUTTONS
 // ==========================
 function setupFilterButtons() {
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function () {
-
-            document.querySelectorAll('.filter-btn')
-                .forEach(b => b.classList.remove('active'));
-
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
-
             displayMenuFoods(this.dataset.category);
         });
     });
 }
-document.getElementById("sendWhatsApp").addEventListener("click", function () {
 
-    const name = document.getElementById("custName").value;
-    const phoneInput = document.getElementById("custPhone").value;
-    const address = document.getElementById("custAddress").value;
-
-    if (!name || !phoneInput || !address) {
-        alert("Please fill all fields!");
-        return;
+// ==========================
+// FLOATING CART
+// ==========================
+document.addEventListener("click", function (e) {
+    if (e.target.closest("#floatingCart")) {
+        openCart();
     }
-
-    let message = "🧾 *Barakah Bites La Order*\n\n";
-
-    let total = 0;
-
-    cart.forEach(item => {
-        let itemTotal = item.price * item.quantity;
-        total += itemTotal;
-
-        message += `🍔 ${item.name}\n`;
-        message += `${item.quantity} x $${item.price.toFixed(2)} = $${itemTotal.toFixed(2)}\n\n`;
-    });
-
-    message += "----------------------\n";
-    message += `💰 *Total: $${total.toFixed(2)}*\n\n`;
-
-    message += "📍 Delivery Info:\n";
-    message += `Name: ${name}\n`;
-    message += `Phone: ${phoneInput}\n`;
-    message += `Address: ${address}\n`;
-
-    const whatsappNumber = "19494268220"; // your US number
-
-    const url = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-
-    window.open(url, "_blank");
-
-    cart = [];
-    saveCartToLocalStorage();
-    updateCartUI();
-
-    document.getElementById("orderFormModal").style.display = "none";
 });
-document.getElementById("closeForm").addEventListener("click", function () {
-    document.getElementById("orderFormModal").style.display = "none";
-});
-const menuToggle = document.getElementById("menuToggle");
-const navLinks = document.querySelector(".nav-links");
-
-if (menuToggle) {
-    menuToggle.addEventListener("click", () => {
-        navLinks.classList.toggle("active");
-    });
-}

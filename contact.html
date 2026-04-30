@@ -92,6 +92,23 @@
         </div>
     </div>
 
+    <div class="cart-modal" id="orderFormModal">
+    <div class="cart-content">
+        <div class="cart-header">
+            <h2>Delivery Details</h2>
+            <span class="close-btn" id="closeForm">&times;</span>
+        </div>
+
+        <div class="cart-body">
+            <input type="text" id="custName" placeholder="Full Name" />
+            <input type="text" id="custPhone" placeholder="Phone Number" />
+            <textarea id="custAddress" placeholder="Delivery Address"></textarea>
+
+            <button class="btn-primary" id="sendWhatsApp">Send Order</button>
+        </div>
+    </div>
+</div>
+
     <!-- Footer -->
     <footer>
         <div class="container">
@@ -122,5 +139,10 @@
     </footer>
 
     <script src="script.js"></script>
+    <div class="floating-cart" id="floatingCart">
+    <i class="fas fa-shopping-cart"></i>
+    <span id="floatingCartCount">0</span>
+</div>
+
 </body>
 </html>

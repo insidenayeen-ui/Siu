@@ -21,7 +21,7 @@ body {
 
 .btn-primary {
     display: inline-block;
-    background: linear-gradient(135deg, #ff6200,  #ff6200);
+    background: linear-gradient(135deg, #ff6200, #ff6200);
     color: white;
     padding: 12px 25px;
     border: none;
@@ -35,7 +35,7 @@ body {
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg,  #ff6200,  #ff6200);
+    background: linear-gradient(135deg, #ff6200, #ff6200);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(30, 60, 114, 0.3);
 }
@@ -67,7 +67,7 @@ header .container {
 }
 
 .logo h1 {
-    color:  #ff6200;
+    color: #ff6200;
     font-size: 24px;
 }
 
@@ -80,6 +80,7 @@ header .container {
     margin-left: 25px;
 }
 
+/* BUG FIX: Cart badge needs position:relative on the parent <a> to anchor correctly */
 .nav-links a {
     text-decoration: none;
     color: #333;
@@ -93,7 +94,7 @@ header .container {
 
 .nav-links a:hover,
 .nav-links a.active {
-    color:  #ff6200;
+    color: #ff6200;
     background-color: rgba(30, 60, 114, 0.1);
 }
 
@@ -113,27 +114,23 @@ header .container {
     width: 100%;
 }
 
-.cart-icon {
-    position: relative;
-    cursor: pointer;
-    font-size: 24px;
-    color: #ff6200;
-}
-
+/* BUG FIX: .cart-count was position:absolute but parent wasn't position:relative.
+   Now the parent <a> is position:relative (above), so the badge anchors correctly. */
 .cart-count {
     position: absolute;
-    top: -8px;
-    right: -8px;
+    top: -6px;
+    right: -6px;
     background: #ff4757;
     color: white;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: bold;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
-    display: flex;
+    display: inline-flex;
     justify-content: center;
     align-items: center;
+    line-height: 1;
 }
 
 /* Hero Section */
@@ -178,6 +175,9 @@ header .container {
 }
 
 .category-card {
+    text-decoration: none;
+    color: inherit;
+    display: block;
     background: white;
     border-radius: 10px;
     overflow: hidden;
@@ -278,6 +278,49 @@ header .container {
     background: linear-gradient(135deg, #ff6200, #ff6200);
 }
 
+/* How It Works Section */
+/* BUG FIX: Use dedicated step classes instead of category-card so the
+   img CSS rule doesn't create a broken 200px empty space in text-only cards */
+.how-it-works {
+    padding: 80px 0;
+}
+
+.how-it-works h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 50px;
+    color: #ff6200;
+}
+
+.steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+}
+
+.step-card {
+    background: white;
+    border-radius: 10px;
+    padding: 30px 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+}
+
+.step-card h3 {
+    font-size: 1.3rem;
+    color: #ff6200;
+    margin-bottom: 10px;
+}
+
+.step-card p {
+    color: #666;
+}
+
 /* Cart Modal */
 .cart-modal {
     display: none;
@@ -373,6 +416,7 @@ header .container {
     height: 30px;
     border-radius: 50%;
     cursor: pointer;
+    font-size: 18px;
 }
 
 .cart-footer {
@@ -398,25 +442,27 @@ header .container {
     padding: 30px 0;
 }
 
-/* Bill Preview Modal */
-#billPreview {
-    white-space: pre-wrap;
-    font-family: 'Courier New', monospace;
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    max-height: 400px;
-    overflow-y: auto;
+/* Order Form Modal inputs */
+#orderFormModal input,
+#orderFormModal textarea {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
     font-size: 14px;
-    line-height: 1.5;
+}
+
+#orderFormModal textarea {
+    height: 100px;
+    resize: none;
 }
 
 /* Footer */
 footer {
     background: #ff6200;
     color: white;
-    padding: 20px 0 20px;
+    padding: 20px 0;
 }
 
 .footer-content {
@@ -459,13 +505,45 @@ footer {
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Responsive Design */
+/* Floating Cart Button */
+.floating-cart {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #1e3c72;
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 3000;
+}
+
+.floating-cart span {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: red;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 /* Mobile Navbar */
 .menu-toggle {
     display: none;
     font-size: 24px;
     cursor: pointer;
-    color: #1e3c72;
+    color: #ff6200;
 }
 
 @media (max-width: 768px) {
@@ -482,7 +560,8 @@ footer {
         flex-direction: column;
         align-items: center;
         display: none;
-        box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        z-index: 999;
     }
 
     .nav-links.active {
@@ -492,9 +571,13 @@ footer {
     .nav-links li {
         margin: 15px 0;
     }
+
+    .hero-content h1 {
+        font-size: 2rem;
+    }
 }
 
-/* Menu Page Specific Styles */
+/* Menu Page */
 .menu-page {
     padding: 50px 0;
 }
@@ -534,9 +617,7 @@ footer {
     color: white;
 }
 
-
-
-/* Contact Page Styles */
+/* Contact Page */
 .contact-page {
     padding: 50px 0;
 }
@@ -558,7 +639,7 @@ footer {
     border-radius: 10px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     max-width: 600px;
-    margin: 0 auto;
+    margin: 0 auto 40px;
 }
 
 .form-group {
@@ -584,22 +665,20 @@ footer {
     height: 150px;
     resize: vertical;
 }
-#orderFormModal input,
-#orderFormModal textarea {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 14px;
+
+.contact-info {
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-#orderFormModal textarea {
-    height: 100px;
-    resize: none;
+.about-content h2 {
+    color: #ff6200;
+    margin-bottom: 15px;
+    margin-top: 25px;
+    font-size: 1.5rem;
 }
-.category-card {
-    text-decoration: none;
-    color: inherit;
-    display: block;
+
+.about-content p {
+    margin-bottom: 10px;
+    color: #555;
 }
