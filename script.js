@@ -76,6 +76,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     loadCartFromLocalStorage();
     updateCartUI();
+    const params = new URLSearchParams(window.location.search);
+const category = params.get("category");
+
+if (category && document.getElementById("menuFoods")) {
+    displayMenuFoods(category);
+}
 
     if (featuredFoods) {
         displayFeaturedFoods();
@@ -385,3 +391,11 @@ document.getElementById("sendWhatsApp").addEventListener("click", function () {
 document.getElementById("closeForm").addEventListener("click", function () {
     document.getElementById("orderFormModal").style.display = "none";
 });
+const menuToggle = document.getElementById("menuToggle");
+const navLinks = document.querySelector(".nav-links");
+
+if (menuToggle) {
+    menuToggle.addEventListener("click", () => {
+        navLinks.classList.toggle("active");
+    });
+}
