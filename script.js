@@ -52,62 +52,6 @@ let foodData = [
     }
 ];
 
-const apiBase = (() => {
-    const segments = window.location.pathname.split('/');
-    segments.pop();
-    const base = segments.join('/');
-    return base === '' ? '/' : base;
-})();
-
-function apiUrl(path) {
-    return apiBase.replace(/\/$/, '') + '/' + path.replace(/^\//, '');
-}
-
-async function postJson(url, data) {
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    });
-
-    const json = await response.json().catch(() => null);
-    if (!response.ok) {
-        throw new Error(json?.error || `HTTP ${response.status}`);
-    }
-    return json;
-}
-
-async function loadMenuData() {
-    try {
-        const response = await fetch(apiUrl('api/menu.php'));
-        const result = await response.json();
-
-        if (result.success && Array.isArray(result.menu)) {
-            foodData = result.menu.map(item => ({
-                id: Number(item.id),
-                name: item.name,
-                price: Number(item.price),
-                category: item.category,
-                image: item.image,
-                description: item.description
-            }));
-        } else {
-            console.warn('Menu API returned invalid data; using local fallback.');
-        }
-    } catch (error) {
-        console.warn('Unable to fetch menu data from API:', error);
-    }
-}
-
-async function saveOrderToBackend(order) {
-    try {
-        return await postJson(apiUrl('api/order.php'), order);
-    } catch (error) {
-        console.error('Order save error:', error);
-        throw error;
-    }
-}
-
 // ==========================
 // CART
 // ==========================
@@ -151,34 +95,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const params   = new URLSearchParams(window.location.search);
     const category = params.get("category");
 
-    const initializeMenu = async () => {
-        await loadMenuData();
+    if (document.getElementById("menuFoods")) {
+        displayMenuFoods(category || 'all');
+        setupFilterButtons();
 
-        if (document.getElementById("menuFoods")) {
-            displayMenuFoods(category || 'all');
-            setupFilterButtons();
-
-            // Highlight the matching filter button when arriving via category link
-            if (category) {
-                document.querySelectorAll('.filter-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.category === category);
-                });
-            }
+        if (category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.category === category);
+            });
         }
+    }
 
-        // -- Home page: featured foods --
-        if (featuredFoods) {
-            displayFeaturedFoods();
-        }
-    };
-
-    if (document.getElementById("menuFoods") || featuredFoods) {
-        initializeMenu();
+    if (featuredFoods) {
+        displayFeaturedFoods();
     }
 
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
-        contactForm.addEventListener('submit', async function (e) {
+        contactForm.addEventListener('submit', function (e) {
             e.preventDefault();
 
             const name = document.getElementById('name').value.trim();
@@ -190,18 +124,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            try {
-                const result = await postJson(apiUrl('api/contact.php'), { name, email, message });
-                if (result.success) {
-                    alert('Thank you! Your message has been received.');
-                    contactForm.reset();
-                } else {
-                    alert(result.error || 'Unable to send your message. Please try again later.');
-                }
-            } catch (error) {
-                alert(error.message || 'Network error submitting contact form.');
-                console.error('Contact submit failed:', error);
-            }
+            alert('This site is currently running without a backend. Please email bbla@barakahbitesla.com if you want a response.');
+            contactForm.reset();
         });
     }
 
@@ -274,25 +198,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-            const orderPayload = {
-                name,
-                phone,
-                address,
-                items: cart,
-                total
-            };
-
-                    try {
-                const result = await saveOrderToBackend(orderPayload);
-                if (!result.success) {
-                    alert(result.error || 'Unable to save your order. Please try again later.');
-                    return;
-                }
-            } catch (error) {
-                alert(error.message || 'Network error saving order.');
-                console.error('Order save failed:', error);
-                return;
-            }
 
             // Build order summary for WhatsApp
             let orderText = `🍔 *New Order - Barakah Bites La*\n\n`;
